@@ -1,31 +1,47 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
- * @package    local_resourcenotif
- * @copyright  2012-2021 Silecs {@link http://www.silecs.info/societe}
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * Resource Notification main page
+ * @package   local_resourcenotif
+ * @copyright 2012-2021 Silecs {@link http://www.silecs.info/societe}
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-use \local_resourcenotif\notification;
-use \local_resourcenotif\notifstudents;
-use \local_resourcenotif\resourcenotif_form;
+use local_resourcenotif\notification;
+use local_resourcenotif\notifstudents;
+use local_resourcenotif\resourcenotif_form;
 
 require_once("../../config.php");
 
 $id = required_param('id', PARAM_INT);
 
 if (! $cm = get_coursemodule_from_id('', $id)) {
-    print_error('invalidcoursemodule');
+    throw new \moodle_exception('invalidcoursemodule');
 }
 
 if (! $moduletype = $DB->get_field('modules', 'name', ['id' => $cm->module], MUST_EXIST)) {
-    print_error('invalidmodule');
+    throw new \moodle_exception('invalidmodule');
 }
 
 if (! $course = $DB->get_record('course', ['id' => $cm->course])) {
-    print_error('coursemisconf');
+    throw new \moodle_exception('coursemisconf');
 }
 
 if (! $module = $DB->get_record($moduletype, ['id' => $cm->instance])) {
-    print_error('invalidcoursemodule');
+    throw new \moodle_exception('invalidcoursemodule');
 }
 
 require_login($course, false, $cm);
@@ -72,25 +88,25 @@ if ($formdata) {
         case 'selection':
             $groups = [];
             if (isset($formdata->groups) && count($formdata->groups)) {
-               $groups =  $formdata->groups;
+                $groups = $formdata->groups;
             }
             $groupings = [];
             if (isset($formdata->groupings) && count($formdata->groupings)) {
-               $groupings =  $formdata->groupings;
+                $groupings = $formdata->groupings;
             }
-            $grpNotifiedStudents = notifstudents::get_users_recipients($groups, $groupings);
-            if (count($grpNotifiedStudents)) {
-                $msgresult = $notificationprocess->send_notifications($grpNotifiedStudents);
+            $grpnotifiedstudents = notifstudents::get_users_recipients($groups, $groupings);
+            if (count($grpnotifiedstudents)) {
+                $msgresult = $notificationprocess->send_notifications($grpnotifiedstudents);
             }
             break;
         case 'selectionstudents':
             $listidstudents = $formdata->students;
             if (count($listidstudents)) {
-                $notifiedS = [];
+                $notifieds = [];
                 foreach ($listidstudents as $id) {
-                    $notifiedS[$id] = $notifiablestudents[$id];
+                    $notifieds[$id] = $notifiablestudents[$id];
                 }
-                $msgresult = $notificationprocess->send_notifications($notifiedS);
+                $msgresult = $notificationprocess->send_notifications($notifieds);
             }
             break;
     }

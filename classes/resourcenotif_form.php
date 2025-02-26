@@ -1,22 +1,47 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
- * @package    local_resourcenotif
- * @copyright  2012-2021 Silecs {@link http://www.silecs.info/societe}
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * Form for sending a notification
+ * @package   local_resourcenotif
+ * @copyright 2012-2021 Silecs {@link http://www.silecs.info/societe}
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 namespace local_resourcenotif;
 
-use \local_resourcenotif\notifstudents;
+use local_resourcenotif\notifstudents;
 
-require_once($CFG->libdir.'/formslib.php');
+defined('MOODLE_INTERNAL') || die();
 
+require_once($CFG->libdir . '/formslib.php');
+
+/**
+ * Form for sending a notification
+ */
 class resourcenotif_form extends \moodleform {
+    /**
+     * Form definition
+     * @return void
+     */
     public function definition() {
 
         $mform = $this->_form;
         $customdata = $this->_customdata;
 
-        // hidden elements
+        // Hidden elements.
         $mform->addElement('hidden', 'id');
         $mform->setType('id', PARAM_INT);
         $mform->addElement('hidden', 'mod');
@@ -24,16 +49,21 @@ class resourcenotif_form extends \moodleform {
         $mform->addElement('hidden', 'courseid');
         $mform->setType('courseid', PARAM_INT);
 
-        //recipients
+        // Recipients.
         $sendok = true;
-        $mform->addElement('header', 'recipient', get_string('recipients', 'local_resourcenotif'));
-        $optionsSendAll = [];
+        $mform->addElement(
+            'header',
+            'recipient',
+            get_string('recipients', 'local_resourcenotif')
+        );
+        $optionssendall = [];
         if ($customdata['nbNotifiedStudents'] == 0) {
-            $optionsSendAll = ['disabled' => 'disabled'];
+            $optionssendall = ['disabled' => 'disabled'];
             $sendok = false;
         }
-        $mform->addElement('radio', 'send', '', '<span class="fake-fitemtitle">' . $customdata['recipients'] . '</span>', 'all', $optionsSendAll);
-        if($sendok) {
+        $mform->addElement('radio', 'send', '', '<span class="fake-fitemtitle">' .
+            $customdata['recipients'] . '</span>', 'all', $optionssendall);
+        if ($sendok) {
             $mform->setDefault('send', 'all');
         }
 
@@ -45,12 +75,12 @@ class resourcenotif_form extends \moodleform {
         $selected = [];
 
         if (count($allgroups)) {
-            $selectgroup = $mform->CreateElement('select','groups', 'Groupes', $allgroups);
+            $selectgroup = $mform->CreateElement('select', 'groups', 'Groupes', $allgroups);
             $selectgroup->setMultiple(true);
             $selected[] = $selectgroup;
         }
         if (count($allgroupings)) {
-            $selectgrouping = $mform->CreateElement('select','groupings', 'Groupements', $allgroupings);
+            $selectgrouping = $mform->CreateElement('select', 'groupings', 'Groupements', $allgroupings);
             $selectgrouping->setMultiple(true);
             $selected[] = $selectgrouping;
         }
@@ -77,13 +107,13 @@ class resourcenotif_form extends \moodleform {
 
         if (count($liststudents)) {
             $mform->addElement('radio', 'send', '', '<span class="fake-fitemtitle">' .
-                get_string('selectstudents', 'local_resourcenotif') . '</span>', 'selectionstudents', $optionsSendAll);
+                get_string('selectstudents', 'local_resourcenotif') . '</span>', 'selectionstudents', $optionssendall);
 
             $mform->addElement('select', 'students', '', $liststudents)->setMultiple(true);
             $mform->disabledIf('students', 'send', 'neq', 'selectionstudents');
         }
 
-        //message
+        // Message.
         $mform->addElement('header', 'message', get_string('content', 'local_resourcenotif'));
         $subjectlabel = \html_writer::tag('span', get_string('subject', 'local_resourcenotif'), ['class' => 'notificationgras']);
         $msgbody = $customdata['formmsgbody'];
@@ -94,18 +124,22 @@ class resourcenotif_form extends \moodleform {
         $mform->addElement('html', $msghtml);
         $mform->setExpanded('message');
 
-        $mform->addElement('header', 'complementheader', get_string('complement', 'local_resourcenotif') );
+        $mform->addElement('header', 'complementheader', get_string('complement', 'local_resourcenotif'));
         $mform->setExpanded('complementheader');
         $mform->addElement('textarea', 'complement', null, ['rows' => 5, 'class' => 'complement', 'style' => 'resize:both;']);
         $mform->setType('complement', PARAM_RAW);
 
-        //-------------------------------------------------------------------------------
-        // buttons
+        // Buttons.
         if ($sendok) {
-            $this->add_action_buttons(true,  get_string('submit', 'local_resourcenotif'));
+            $this->add_action_buttons(true, get_string('submit', 'local_resourcenotif'));
         }
     }
 
+    /**
+     * Form validation
+     * @param mixed $data
+     * @param mixed $files
+     */
     public function validation($data, $files) {
         $errors = parent::validation($data, $files);
         if (empty($errors)) {
@@ -114,6 +148,11 @@ class resourcenotif_form extends \moodleform {
         return $errors;
     }
 
+    /**
+     * Validate the recipient
+     * @param mixed $data
+     * @param mixed $errors
+     */
     private function validation_recipient($data, &$errors) {
         if (isset($data['send'])) {
             if ($data['send'] == 'selection' && !isset($data['groups']) && !isset($data['groupings'])) {

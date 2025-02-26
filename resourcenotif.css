@@ -4,23 +4,31 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 .cache {
-	display: none;
+  display: none;
 }
+
+/*
 .notificationlabel {
-    /**margin-left:16%;**/
+  margin-left:16%;
 }
+*/
+
 .notificationgras {
-    font-weight: 700;
+  font-weight: 700;
 }
+
 #id_submitbutton {
-    font-weight: 700;
+  font-weight: 700;
 }
+
 #fitem_id_complement div.fitemtitle {
-    width: 0px;
+  width: 0;
 }
+
 #fitem_id_complement div.felement {
-    margin: 0px;
+  margin: 0;
 }
+
 .complement {
-    width: 100%;
+  width: 100%;
 }

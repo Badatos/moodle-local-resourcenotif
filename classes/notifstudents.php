@@ -1,38 +1,66 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
- * @package    local_resourcenotif
- * @copyright  2012-2021 Silecs {@link http://www.silecs.info/societe}
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * Students notifications
+ * @package   local_resourcenotif
+ * @copyright 2012-2021 Silecs {@link http://www.silecs.info/societe}
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 namespace local_resourcenotif;
+
+defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/user/lib.php');
 require_once($CFG->libdir . '/externallib.php');
 
-class notifstudents
-{
-
+/**
+ * Class notifstudents
+ */
+class notifstudents {
+    /**
+     * @var int Course id
+     */
     public $courseid;
+    /**
+     * @var \stdClass coursemodule description
+     */
     public $cm;
 
-    public function __construct($courseid, $cm)
-    {
+    /**
+     * notifstudents constructor.
+     * @param mixed $courseid
+     * @param mixed $cm
+     */
+    public function __construct($courseid, $cm) {
         $this->courseid = $courseid;
         $this->cm = $cm;
     }
 
     /**
-     * renvoie les utilisateurs ayant le rôle 'rolename'
-     * dans le cours $courseid
+     * Renvoie les utilisateurs ayant le rôle 'rolename'
+     * dans le cours courant
      *
-     * @param int $courseid
      * @param string $rolename shortname du rôle
      * @return array [users...]
      */
     public function get_users_from_course($rolename) {
         global $DB;
         $coursecontext = \context_course::instance($this->courseid);
-        $roletarget = $DB->get_record('role', ['shortname'=> $rolename]);
+        $roletarget = $DB->get_record('role', ['shortname' => $rolename]);
         $targetcontext = get_users_from_role_on_context($roletarget, $coursecontext);
 
         if (count($targetcontext) == 0) {
@@ -89,14 +117,14 @@ class notifstudents
      * @return array [id => student_fullname]
      **/
     public function get_list_students() {
-        $listStudent = [];
+        $liststudent = [];
         $students = $this->get_users_from_course('student');
         if (!empty($students)) {
             foreach ($students as $id => $student) {
-                $listStudent[$id] = user_get_user_details($student)['fullname'];
+                $liststudent[$id] = user_get_user_details($student)['fullname'];
             }
         }
-        return $listStudent;
+        return $liststudent;
     }
 
     /**

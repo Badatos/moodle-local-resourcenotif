@@ -1,34 +1,62 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
- * @package    local_resourcenotif
- * @copyright  2012-2021 Silecs {@link http://www.silecs.info/societe}
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * Resource Notifications
+ * @package   local_resourcenotif
+ * @copyright 2012-2021 Silecs {@link http://www.silecs.info/societe}
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace local_resourcenotif;
 
-class notification
-{
-    /** @var stdClass $course course record */
-    public $course; //
-    /** @var stdClass $cm course_modules record */
-    public $cm; // course module
-    /** @var string $moduletype */
+/**
+ * notification class
+ */
+class notification {
+    /** @var \stdClass course record */
+    public $course;
+    /** @var \stdClass course_modules record */
+    public $cm;
+    /** @var string Module type */
     public $moduletype;
-
+    /** @var array message body info */
     private $msgbodyinfo;
+    /** @var int number of notifications sent */
     private $nbsent = 0;
-    private $message; //complete notification message
+    /** @var \stdClass complete notification message */
+    private $message;
 
-    public function __construct($course, $cm, $moduletype)
-    {
+    /**
+     * notification constructor.
+     * @param mixed $course
+     * @param mixed $cm
+     * @param mixed $moduletype
+     */
+    public function __construct($course, $cm, $moduletype) {
         $this->course = $course;
         $this->cm = $cm;
         $this->moduletype = $moduletype;
     }
 
-    public function set_message_body_info()
-    {
+    /**
+     * Set the message body info
+     * @return void
+     */
+    public function set_message_body_info() {
         global $USER;
         $site = \get_site();
 
@@ -44,8 +72,7 @@ class notification
     }
 
     /**
-     * build the $message attribute (subject, text body and html body)
-     *
+     * Build the $message attribute (subject, text body and html body)
      * @param string $complement
      * @return bool
      */
@@ -70,13 +97,12 @@ class notification
     }
 
     /**
-     * prepare the customdata to pass to the main form
+     * Prepare the customdata to pass to the main form
      * @param array $notifiablestudents
      * @return array
      */
-    public function get_form_customdata($notifiablestudents)
-    {
-        if ( ! $notifiablestudents ) {
+    public function get_form_customdata($notifiablestudents) {
+        if (!$notifiablestudents) {
             $recipients = get_string('norecipient', 'local_resourcenotif');
         } else {
             $recipients = $this->get_recipients_label(count($notifiablestudents));
@@ -119,7 +145,7 @@ class notification
     }
 
     /**
-     * Envoi une notification aux $users + copie à $USER
+     * Envoi une notification aux $users + copie à $USER.
      *
      * @param array $users
      * @return string interface message
@@ -173,7 +199,7 @@ class notification
         $eventdata->fullmessage = $this->message->bodytext;
         $eventdata->fullmessagehtml = $this->message->bodyhtml;
         // With FORMAT_HTML, most outputs will use fullmessagehtml, and convert it to plain text if necessary.
-        // but some output plugins will behave differently (airnotifier only uses fullmessage)
+        // but some output plugins will behave differently (airnotifier only uses fullmessage).
         $eventdata->fullmessageformat = FORMAT_HTML;
         // If smallmessage is not empty,
         // it will have priority over the 2 other fields, with a hard coded FORMAT_PLAIN.
@@ -189,10 +215,12 @@ class notification
      * @return string
      */
     private function get_message_subject() {
-        $subject = sprintf('%s %s - %s',
+        $subject = sprintf(
+            '%s %s - %s',
             get_string('notification', 'local_resourcenotif'),
             $this->course->shortname,
-            \format_string($this->cm->name));
+            \format_string($this->cm->name)
+        );
         return $subject;
     }
 
@@ -202,9 +230,9 @@ class notification
      * return string
      */
     public function get_message_body($type) {
-        $message_body = get_config('local_resourcenotif','message_body');
+        $messagebody = get_config('local_resourcenotif', 'message_body');
         $coursename = $this->msgbodyinfo['fullnamecourse'];
-        $message_body = str_replace('[[sender]]', $this->msgbodyinfo['user'], $message_body);
+        $messagebody = str_replace('[[sender]]', $this->msgbodyinfo['user'], $messagebody);
 
         if ($type == 'html') {
             $linkactivity = \html_writer::link($this->msgbodyinfo['urlactivity'], $this->msgbodyinfo['nameactivity']);
@@ -213,9 +241,8 @@ class notification
             $linkactivity = $this->msgbodyinfo['nameactivity'];
             $linkcourse = $coursename;
         }
-        $message_body = str_replace('[[linkactivity]]', $linkactivity, $message_body);
-        $message_body = str_replace('[[linkcourse]]', $linkcourse, $message_body);
-        return $message_body;
+        $messagebody = str_replace('[[linkactivity]]', $linkactivity, $messagebody);
+        $messagebody = str_replace('[[linkcourse]]', $linkcourse, $messagebody);
+        return $messagebody;
     }
-
 }
