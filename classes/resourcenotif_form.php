@@ -41,6 +41,8 @@ class resourcenotif_form extends \moodleform {
         $mform = $this->_form;
         $customdata = $this->_customdata;
 
+        $selectattributes = ['size' => 5, 'class' => 'notif-selector'];
+
         // Hidden elements.
         $mform->addElement('hidden', 'id');
         $mform->setType('id', PARAM_INT);
@@ -61,8 +63,7 @@ class resourcenotif_form extends \moodleform {
             $optionssendall = ['disabled' => 'disabled'];
             $sendok = false;
         }
-        $mform->addElement('radio', 'send', '', '<span class="fake-fitemtitle">' .
-            $customdata['recipients'] . '</span>', 'all', $optionssendall);
+        $mform->addElement('radio', 'send', '', $customdata['recipients'], 'all', $optionssendall);
         if ($sendok) {
             $mform->setDefault('send', 'all');
         }
@@ -75,12 +76,24 @@ class resourcenotif_form extends \moodleform {
         $selected = [];
 
         if (count($allgroups)) {
-            $selectgroup = $mform->CreateElement('select', 'groups', 'Groupes', $allgroups);
+            $selectgroup = $mform->createElement(
+                'select',
+                'groups',
+                get_string('groups'),
+                $allgroups,
+                $selectattributes
+            );
             $selectgroup->setMultiple(true);
             $selected[] = $selectgroup;
         }
         if (count($allgroupings)) {
-            $selectgrouping = $mform->CreateElement('select', 'groupings', 'Groupements', $allgroupings);
+            $selectgrouping = $mform->createElement(
+                'select',
+                'groupings',
+                get_string('groupings', 'group'),
+                $allgroupings,
+                $selectattributes
+            );
             $selectgrouping->setMultiple(true);
             $selected[] = $selectgrouping;
         }
@@ -90,10 +103,10 @@ class resourcenotif_form extends \moodleform {
                 'radio',
                 'send',
                 '',
-                '<span class="fake-fitemtitle">' . get_string('selectedmembers', 'local_resourcenotif') . '</span>',
+                get_string('selectedmembers', 'local_resourcenotif'),
                 'selection'
             );
-            $mform->addGroup($selected, 'myselected', "", ['&nbsp;&nbsp;&nbsp;'], false);
+            $mform->addGroup($selected, 'myselected', "", [' '], false);
             $mform->disabledIf('groups[]', 'send', 'neq', 'selection');
             $mform->disabledIf('groupings[]', 'send', 'neq', 'selection');
             if ($sendok == false) {
@@ -101,16 +114,35 @@ class resourcenotif_form extends \moodleform {
                 $sendok = true;
             }
         } else {
-            $mform->addElement('radio', 'send', '', '<span class="fake-fitemtitle">'
-                . get_string('groupsgroupingsnone', 'local_resourcenotif') . '</span>', 'selection', ['disabled' => 'disabled']);
+            $mform->addElement(
+                'radio',
+                'send',
+                '',
+                get_string('groupsgroupingsnone', 'local_resourcenotif'),
+                'selection',
+                ['disabled' => 'disabled']
+            );
         }
 
         if (count($liststudents)) {
-            $mform->addElement('radio', 'send', '', '<span class="fake-fitemtitle">' .
-                get_string('selectstudents', 'local_resourcenotif') . '</span>', 'selectionstudents', $optionssendall);
-
-            $mform->addElement('select', 'students', '', $liststudents)->setMultiple(true);
-            $mform->disabledIf('students', 'send', 'neq', 'selectionstudents');
+            $mform->addElement(
+                'radio',
+                'send',
+                '',
+                get_string('specificstudents', 'local_resourcenotif'),
+                'selectionstudents',
+                $optionssendall
+            );
+            $selectstudent = $mform->createElement(
+                'select',
+                'students',
+                get_string('selectstudents', 'local_resourcenotif'),
+                $liststudents,
+                $selectattributes
+            );
+            $selectstudent->setMultiple(true);
+            $mform->addGroup([$selectstudent], '', '', ' ', false);
+            $mform->disabledIf('students[]', 'send', 'neq', 'selectionstudents');
         }
 
         // Message.
@@ -119,14 +151,17 @@ class resourcenotif_form extends \moodleform {
         $msgbody = $customdata['formmsgbody'];
         $msghtml = \html_writer::tag('p', $subjectlabel . $customdata['emailsubject'], ['class' => 'notificationlabel'])
             . \html_writer::tag('p', get_string('body', 'local_resourcenotif'), ['class' => 'notificationlabel notificationgras'])
-            . \html_writer::tag('p', $msgbody, ['class' => 'notificationlabel']);
+            . \html_writer::tag('blockquote', $msgbody, ['class' => 'notificationlabel']);
 
         $mform->addElement('html', $msghtml);
         $mform->setExpanded('message');
 
-        $mform->addElement('header', 'complementheader', get_string('complement', 'local_resourcenotif'));
-        $mform->setExpanded('complementheader');
-        $mform->addElement('textarea', 'complement', null, ['rows' => 5, 'class' => 'complement', 'style' => 'resize:both;']);
+        $mform->addElement(
+            'textarea',
+            'complement',
+            get_string('complement', 'local_resourcenotif'),
+            ['rows' => 5, 'class' => 'complement', 'style' => 'resize:both;']
+        );
         $mform->setType('complement', PARAM_RAW);
 
         // Buttons.

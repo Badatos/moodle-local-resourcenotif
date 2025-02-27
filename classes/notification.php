@@ -180,7 +180,7 @@ class notification {
     /**
      * Envoie un message interne à l'utilisateur spécifié
      *
-     * @param stdClass $user
+     * @param \stdClass $user
      * @return mixed false ou resultat de la fonction message_send()
      **/
     private function send_message($user) {

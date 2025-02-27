@@ -13,12 +13,12 @@
 }
 */
 
-.notificationgras {
+.notificationgras, #id_submitbutton {
   font-weight: 700;
 }
 
-#id_submitbutton {
-  font-weight: 700;
+span.notificationgras {
+  margin-right: .5em;
 }
 
 #fitem_id_complement div.fitemtitle {
@@ -31,4 +31,8 @@
 
 .complement {
   width: 100%;
+}
+
+.mform .d-flex .notif-selector {
+  margin-left: 1.5em !important;
 }

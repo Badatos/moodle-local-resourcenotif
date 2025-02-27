@@ -43,5 +43,6 @@ $string['selectedmembers'] = 'Members of selected groups/groupings: ';
 $string['selectstudents'] = 'Individual participants';
 $string['sender'] = 'Sender: ';
 $string['sendnotification'] = 'Send a notification';
+$string['specificstudents'] = 'Specific participants';
 $string['subject'] = 'Subject: ';
 $string['submit'] = 'Send';
