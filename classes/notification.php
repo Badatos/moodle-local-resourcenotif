@@ -170,10 +170,20 @@ class notification {
      * @return string message interface
      */
     private function get_result_action_notification() {
+        global $USER;
         if ($this->nbsent == 0) {
             return get_string('nomessagesend', 'local_resourcenotif');
         }
         $message = get_string('numbernotification', 'local_resourcenotif', $this->nbsent);
+
+        $event = \local_resourcenotif\event\notification_sent::create([
+            'courseid' => $this->course->id,
+            'userid' => $USER->id,
+            'context' => $this->cm,
+            'other' => ['message' => $message],
+        ]);
+        $event->trigger();
+
         return $message;
     }
 

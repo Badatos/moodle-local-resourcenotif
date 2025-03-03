@@ -29,6 +29,7 @@ $string['descriptionmsg'] = 'Available parameters: [[sender]], [[linkactivity]],
 $string['errorselectgroup'] = 'You must select at least one group/grouping';
 $string['errorselectrecipient'] = 'Please select a recipient';
 $string['errorselectstudent'] = 'You must select at least one participant';
+$string['event'] = 'Notification sent';
 $string['grouprecipient'] = 'Participants allowed to view <a href="{$a->linkactivity}">{$a->nameactivity}</a> ({$a->nbdest} users - Restrict access conditions have been applied to this activity/resource)';
 $string['groupsgroupingsnone'] = 'No groups/groupings';
 $string['messageprovider:resourcenotif_notification'] = 'Activity/resource notifications';
